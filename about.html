@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About Us — Maple Street Books</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --cream:   #fdf6ec;
+      --warm:    #f5e6cc;
+      --maple:   #b5451b;
+      --maple-dk:#8c3213;
+      --ink:     #1e1a17;
+      --muted:   #6b5e52;
+      --leaf:    #4a7c59;
+      --leaf-lt: #d4ead9;
+      --radius:  10px;
+      --shadow:  0 4px 18px rgba(30,26,23,.12);
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Georgia', serif;
+      background: var(--cream);
+      color: var(--ink);
+      line-height: 1.7;
+    }
+
+    /* ── Nav ── */
+    nav {
+      position: sticky; top: 0; z-index: 999;
+      background: var(--ink);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2rem; height: 62px;
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: .6rem;
+      color: var(--cream); font-size: 1.15rem; font-weight: bold;
+      text-decoration: none; letter-spacing: .04em;
+    }
+    .nav-logo .leaf-icon { font-size: 1.4rem; }
+    nav ul { list-style: none; display: flex; gap: 2rem; }
+    nav a {
+      color: #d9cfc6; text-decoration: none;
+      font-family: 'Arial', sans-serif; font-size: .88rem; letter-spacing: .06em;
+      text-transform: uppercase; transition: color .2s;
+    }
+    nav a:hover, nav a.active { color: var(--maple); }
+
+    /* ── Page Hero ── */
+    .page-hero {
+      background: var(--ink);
+      color: var(--cream);
+      text-align: center;
+      padding: 4rem 2rem 3rem;
+    }
+    .page-hero h1 {
+      font-size: clamp(2rem, 5vw, 3rem);
+      margin-bottom: .5rem;
+      color: var(--warm);
+    }
+    .page-hero p {
+      font-size: 1.1rem;
+      color: #b0a090;
+      font-style: italic;
+    }
+
+    /* ── Main Content ── */
+    main {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 5rem;
+    }
+
+    /* ── Story Section ── */
+    .story { margin-bottom: 3.5rem; }
+    .story h2 {
+      font-size: 1.6rem;
+      color: var(--maple);
+      margin-bottom: 1rem;
+      border-left: 4px solid var(--maple);
+      padding-left: .75rem;
+    }
+    .story p { margin-bottom: 1rem; color: var(--ink); }
+
+    /* ── Values Grid ── */
+    .values-section { margin-bottom: 3.5rem; }
+    .values-section h2 {
+      font-size: 1.6rem;
+      color: var(--maple);
+      margin-bottom: 1.5rem;
+      border-left: 4px solid var(--maple);
+      padding-left: .75rem;
+    }
+    .values-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 1.4rem;
+    }
+    .value-card {
+      background: var(--warm);
+      border-radius: var(--radius);
+      padding: 1.4rem 1.2rem;
+      box-shadow: var(--shadow);
+    }
+    .value-card .icon { font-size: 2rem; margin-bottom: .6rem; }
+    .value-card h3 { font-size: 1.05rem; color: var(--maple-dk); margin-bottom: .4rem; }
+    .value-card p { font-size: .92rem; color: var(--muted); }
+
+    /* ── Team Section ── */
+    .team-section { margin-bottom: 3.5rem; }
+    .team-section h2 {
+      font-size: 1.6rem;
+      color: var(--maple);
+      margin-bottom: 1.5rem;
+      border-left: 4px solid var(--maple);
+      padding-left: .75rem;
+    }
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.4rem;
+    }
+    .team-card {
+      background: #fff;
+      border-radius: var(--radius);
+      padding: 1.5rem 1.2rem;
+      text-align: center;
+      box-shadow: var(--shadow);
+      border-top: 4px solid var(--leaf);
+    }
+    .team-card .avatar {
+      width: 72px; height: 72px; border-radius: 50%;
+      background: var(--leaf-lt);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; margin: 0 auto 1rem;
+    }
+    .team-card h3 { font-size: 1rem; color: var(--ink); margin-bottom: .2rem; }
+    .team-card .role { font-size: .85rem; color: var(--leaf); font-style: italic; margin-bottom: .5rem; }
+    .team-card p { font-size: .88rem; color: var(--muted); }
+
+    /* ── Community Section ── */
+    .community {
+      background: var(--leaf-lt);
+      border-radius: var(--radius);
+      padding: 2rem;
+      margin-bottom: 3.5rem;
+    }
+    .community h2 {
+      font-size: 1.6rem;
+      color: var(--leaf);
+      margin-bottom: 1rem;
+    }
+    .community p { margin-bottom: .8rem; color: var(--ink); }
+    .community ul {
+      padding-left: 1.4rem;
+      margin-top: .5rem;
+    }
+    .community li { margin-bottom: .5rem; color: var(--ink); }
+
+    /* ── CTA Banner ── */
+    .cta-banner {
+      background: var(--maple);
+      color: var(--cream);
+      border-radius: var(--radius);
+      padding: 2.5rem 2rem;
+      text-align: center;
+    }
+    .cta-banner h2 { font-size: 1.5rem; margin-bottom: .6rem; }
+    .cta-banner p { font-size: 1rem; margin-bottom: 1.4rem; opacity: .9; }
+    .cta-banner a {
+      display: inline-block;
+      background: var(--cream);
+      color: var(--maple-dk);
+      font-family: 'Arial', sans-serif;
+      font-weight: bold;
+      font-size: .9rem;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      text-decoration: none;
+      padding: .75rem 2rem;
+      border-radius: 6px;
+      transition: background .2s, color .2s;
+    }
+    .cta-banner a:hover { background: var(--warm); color: var(--ink); }
+
+    /* ── Footer ── */
+    footer {
+      background: var(--ink);
+      color: #9e9189;
+      text-align: center;
+      padding: 1.6rem 1rem;
+      font-family: 'Arial', sans-serif;
+      font-size: .82rem;
+    }
+    footer a { color: var(--maple); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav>
+    <a href="index.html" class="nav-logo">
+      <span class="leaf-icon">🍁</span> Maple Street Books
+    </a>
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="index.html#books">Books</a></li>
+      <li><a href="index.html#events">Events</a></li>
+      <li><a href="index.html#hours">Hours</a></li>
+      <li><a href="about.html" class="active">About</a></li>
+      <li><a href="index.html#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <!-- Page Hero -->
+  <header class="page-hero">
+    <h1>Our Story</h1>
+    <p>Independent. Community-rooted. Proudly bookish since 2008.</p>
+  </header>
+
+  <main>
+
+    <!-- Our Story -->
+    <section class="story">
+      <h2>How Maple Street Books Began</h2>
+      <p>
+        Maple Street Books opened its doors in the spring of 2008, born from a simple belief:
+        every neighborhood deserves a place where stories live and readers gather. Founders
+        Claire and Daniel Hartwell converted a century-old hardware store into the warm,
+        shelf-lined refuge you visit today — exposed brick, creaking floors, and all.
+      </p>
+      <p>
+        What started as a modest collection of literary fiction and local history has grown into
+        a carefully curated inventory spanning every genre, age group, and interest. We stock
+        more than 12,000 titles at any given time, with a dedicated section for regional authors
+        and a rotating display of staff obsessions.
+      </p>
+      <p>
+        Through two recessions, a pandemic, and the relentless rise of online retail, Maple
+        Street Books has endured — and thrived — because of <em>you</em>. Our customers are
+        our neighbors, our friends, and our reason for showing up every morning.
+      </p>
+    </section>
+
+    <!-- Our Values -->
+    <section class="values-section">
+      <h2>What We Stand For</h2>
+      <div class="values-grid">
+        <div class="value-card">
+          <div class="icon">📚</div>
+          <h3>Curation Over Volume</h3>
+          <p>Every title on our shelves was chosen intentionally. We'd rather carry the right book than every book.</p>
+        </div>
+        <div class="value-card">
+          <div class="icon">🌍</div>
+          <h3>Diverse Voices</h3>
+          <p>We actively seek out authors from underrepresented communities and dedicate permanent shelf space to their work.</p>
+        </div>
+        <div class="value-card">
+          <div class="icon">🏘️</div>
+          <h3>Local First</h3>
+          <p>We partner with local schools, libraries, and nonprofits, and we source from independent publishers whenever we can.</p>
+        </div>
+        <div class="value-card">
+          <div class="icon">♻️</div>
+          <h3>Sustainable Practices</h3>
+          <p>Recycled bags, minimal packaging, and a thriving used-book section reduce waste and make reading more affordable.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Meet the Team -->
+    <section class="team-section">
+      <h2>Meet the Team</h2>
+      <div class="team-grid">
+        <div class="team-card">
+          <div class="avatar">👩‍💼</div>
+          <h3>Claire Hartwell</h3>
+          <div class="role">Co-founder &amp; Owner</div>
+          <p>Literary fiction devotee. Will talk your ear off about Toni Morrison. Bakes the cookies at author events.</p>
+        </div>
+        <div class="team-card">
+          <div class="avatar">👨‍💼</div>
+          <h3>Daniel Hartwell</h3>
+          <div class="role">Co-founder &amp; Buyer</div>
+          <p>History and science buff. Responsible for the best non-fiction wall in three counties.</p>
+        </div>
+        <div class="team-card">
+          <div class="avatar">👩‍🎨</div>
+          <h3>Priya Nair</h3>
+          <div class="role">Events Coordinator</div>
+          <p>Orchestrates every reading, signing, and storytelling session with infectious enthusiasm.</p>
+        </div>
+        <div class="team-card">
+          <div class="avatar">👦</div>
+          <h3>Marcus Webb</h3>
+          <div class="role">Children's Section Lead</div>
+          <p>Champion of middle-grade fiction and the person every kid asks for by name.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Community -->
+    <section class="community">
+      <h2>🌿 Deep in the Community</h2>
+      <p>
+        We believe a bookstore is more than a retail space — it's a civic institution. Over the
+        years we've partnered with dozens of local organisations to put books in the hands of
+        people who need them most:
+      </p>
+      <ul>
+        <li><strong>Maple Street Reads:</strong> Annual used-book drive donating 2,000+ books to local schools each autumn.</li>
+        <li><strong>Story Corner:</strong> Free Saturday-morning storytime for children under 8, running every week since 2010.</li>
+        <li><strong>First Chapter Fund:</strong> Subsidised books for families referred by the city's social services department.</li>
+        <li><strong>Author in Residence:</strong> Month-long programme hosting a local writer with free public workshops.</li>
+        <li><strong>Book Club Network:</strong> We sponsor and supply 14 independent neighbourhood book clubs.</li>
+      </ul>
+    </section>
+
+    <!-- CTA -->
+    <div class="cta-banner">
+      <h2>Come Say Hello 👋</h2>
+      <p>We're open seven days a week and always happy to help you find your next favourite read.</p>
+      <a href="index.html#contact">Get Directions &amp; Hours</a>
+    </div>
+
+  </main>
+
+  <footer>
+    <p>© 2025 Maple Street Books · 47 Maple Street · <a href="index.html">Back to Home</a></p>
+  </footer>
+
+</body>
+</html>
