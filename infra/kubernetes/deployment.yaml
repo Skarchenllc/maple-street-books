@@ -1,0 +1,168 @@
+# ============================================================
+#  Maple Docker — Kubernetes Manifests
+#  Orchestration: Kubernetes (fallback / container runtime)
+# ============================================================
+
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: maple-docker
+  labels:
+    app.kubernetes.io/name: maple-street-books
+    app.kubernetes.io/managed-by: kubectl
+
+---
+# ── ConfigMap: Nginx config for React SPA ───────────────────
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+  namespace: maple-docker
+data:
+  default.conf: |
+    server {
+      listen 80;
+      server_name _;
+      root /usr/share/nginx/html;
+      index index.html;
+
+      # React SPA — all routes fall back to index.html
+      location / {
+        try_files $uri $uri/ /index.html;
+      }
+
+      # Cache static assets aggressively
+      location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff2?)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+      }
+
+      gzip on;
+      gzip_types text/plain text/css application/json
+                 application/javascript text/xml application/xml
+                 application/xml+rss text/javascript;
+    }
+
+---
+# ── Deployment ───────────────────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: maple-street-books
+  namespace: maple-docker
+  labels:
+    app: maple-street-books
+    version: latest
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: maple-street-books
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: maple-street-books
+        version: latest
+    spec:
+      containers:
+        - name: maple-street-books
+          image: skarchenllc-maple-street-books:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+              protocol: TCP
+          volumeMounts:
+            - name: nginx-config
+              mountPath: /etc/nginx/conf.d/default.conf
+              subPath: default.conf
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "200m"
+              memory: "128Mi"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 15
+            periodSeconds: 20
+      volumes:
+        - name: nginx-config
+          configMap:
+            name: nginx-config
+
+---
+# ── Service ──────────────────────────────────────────────────
+apiVersion: v1
+kind: Service
+metadata:
+  name: maple-street-books-svc
+  namespace: maple-docker
+spec:
+  selector:
+    app: maple-street-books
+  ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+  type: ClusterIP
+
+---
+# ── Ingress ──────────────────────────────────────────────────
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: maple-street-books-ingress
+  namespace: maple-docker
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: maple-street-books.skarchenllc.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: maple-street-books-svc
+                port:
+                  number: 80
+
+---
+# ── HorizontalPodAutoscaler ───────────────────────────────────
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: maple-street-books-hpa
+  namespace: maple-docker
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: maple-street-books
+  minReplicas: 2
+  maxReplicas: 6
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
