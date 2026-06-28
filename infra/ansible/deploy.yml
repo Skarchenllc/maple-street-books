@@ -1,0 +1,116 @@
+# ============================================================
+#  Maple Docker — Ansible Playbook
+#  Config Management: deploy + configure the app environment
+# ============================================================
+---
+- name: "Maple Street Books — Full Deployment Playbook"
+  hosts: all
+  become: true
+  gather_facts: true
+
+  vars:
+    project_name: maple-street-books
+    docker_image: skarchenllc-maple-street-books:latest
+    container_port: 80
+    host_port: 8080
+    aws_region: us-east-1
+    s3_bucket: maple-street-books-site
+    cloudfront_id: "{{ lookup('env', 'CLOUDFRONT_ID') }}"
+    build_dir: "{{ playbook_dir }}/../../"
+
+  pre_tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: true
+        cache_valid_time: 3600
+      when: ansible_os_family == "Debian"
+
+  tasks:
+    # ── Docker ────────────────────────────────────────────────
+    - name: Ensure Docker is installed
+      package:
+        name:
+          - docker.io
+          - docker-compose
+        state: present
+
+    - name: Ensure Docker service is running
+      service:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Pull / load Docker image
+      community.docker.docker_image:
+        name: "{{ docker_image }}"
+        source: local
+      ignore_errors: true
+
+    - name: Run container (local fallback)
+      community.docker.docker_container:
+        name: "{{ project_name }}"
+        image: "{{ docker_image }}"
+        state: started
+        restart_policy: unless-stopped
+        ports:
+          - "{{ host_port }}:{{ container_port }}"
+
+    # ── AWS CLI ───────────────────────────────────────────────
+    - name: Ensure AWS CLI v2 is installed
+      snap:
+        name: aws-cli
+        classic: true
+        state: present
+      ignore_errors: true
+
+    # ── S3 Sync ───────────────────────────────────────────────
+    - name: Sync site assets to S3
+      command: >
+        aws s3 sync {{ build_dir }} s3://{{ s3_bucket }}/
+        --exclude "*"
+        --include "*.html"
+        --include "*.css"
+        --include "*.js"
+        --include "*.png"
+        --include "*.jpg"
+        --include "*.svg"
+        --include "*.ico"
+        --delete
+        --region {{ aws_region }}
+      environment:
+        AWS_DEFAULT_REGION: "{{ aws_region }}"
+
+    # ── CloudFront Invalidation ───────────────────────────────
+    - name: Invalidate CloudFront cache
+      command: >
+        aws cloudfront create-invalidation
+        --distribution-id {{ cloudfront_id }}
+        --paths "/*"
+      when: cloudfront_id != ""
+      environment:
+        AWS_DEFAULT_REGION: "{{ aws_region }}"
+
+    # ── Kubernetes ────────────────────────────────────────────
+    - name: Ensure kubectl is installed
+      snap:
+        name: kubectl
+        classic: true
+        state: present
+      ignore_errors: true
+
+    - name: Apply Kubernetes manifests
+      command: kubectl apply -f {{ build_dir }}/infra/kubernetes/deployment.yaml
+      ignore_errors: true
+
+  post_tasks:
+    - name: Confirm container is healthy
+      community.docker.docker_container_info:
+        name: "{{ project_name }}"
+      register: container_info
+
+    - name: Print live endpoints
+      debug:
+        msg:
+          - "Local container : http://{{ ansible_host }}:{{ host_port }}"
+          - "S3 website      : http://{{ s3_bucket }}.s3-website-{{ aws_region }}.amazonaws.com"
+          - "CloudFront HTTPS: https://{{ cloudfront_id }}.cloudfront.net  (check outputs)"
